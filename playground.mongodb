@@ -1,0 +1,703 @@
+// MongoDB Playground
+// To disable this template go to Settings | MongoDB | Use Default Template For Playground.
+// Make sure you are connected to enable completions and to be able to run a playground.
+// Use Ctrl+Space inside a snippet or a string literal to trigger completions.
+
+// Select the database to use.
+use('invoices');
+
+db.createCollection("clients", {
+    validator: {
+        $jsonSchema: {
+            bsonType: "object",
+            required: ["name", "contact", "billingInformation", "createdDate"],
+            properties: {
+                name: {
+                    bsonType: "string",
+                    description: "Client name must be a string and is required"
+                },
+                contact: {
+                    bsonType: "object",
+                    required: ["email", "phone", "address"],
+                    properties: {
+                        email: {
+                            bsonType: "string",
+                            pattern: "^.+@.+$",
+                            description: "Must be a valid email address and is required"
+                        },
+                        phone: {
+                            bsonType: "string",
+                            description: "Phone number must be a string and is required"
+                        },
+                        address: {
+                            bsonType: "object",
+                            required: ["street", "city", "state", "zip", "country"],
+                            properties: {
+                                street: {
+                                    bsonType: "string",
+                                    description: "Street address must be a string and is required"
+                                },
+                                city: {
+                                    bsonType: "string",
+                                    description: "City must be a string and is required"
+                                },
+                                state: {
+                                    bsonType: "string",
+                                    description: "State must be a string and is required"
+                                },
+                                zip: {
+                                    bsonType: "string",
+                                    description: "ZIP code must be a string and is required"
+                                },
+                                country: {
+                                    bsonType: "string",
+                                    description: "Country must be a string and is required"
+                                }
+                            }
+                        }
+                    }
+                },
+                billingInformation: {
+                    bsonType: "object",
+                    required: ["billingAddress", "paymentTerms", "preferredPaymentMethod"],
+                    properties: {
+                        billingAddress: {
+                            bsonType: "string",
+                            description: "Billing address must be a string and is required"
+                        },
+                        paymentTerms: {
+                            bsonType: "string",
+                            description: "Payment terms must be a string and is required"
+                        },
+                        preferredPaymentMethod: {
+                            bsonType: "string",
+                            description: "Preferred payment method must be a string and is required"
+                        }
+                    }
+                },
+                createdDate: {
+                    bsonType: "date",
+                    description: "Creation date must be a date and is required"
+                }
+            }
+        }
+    }
+});
+
+
+db.createCollection("paymentProcessors", {
+    validator: {
+        $jsonSchema: {
+            bsonType: "object",
+            required: ["name", "type", "contact", "services", "createdDate"],
+            properties: {
+                name: {
+                    bsonType: "string",
+                    description: "Processor name must be a string and is required"
+                },
+                type: {
+                    bsonType: "string",
+                    description: "Processor type must be a string and is required"
+                },
+                contact: {
+                    bsonType: "object",
+                    required: ["email", "phone", "address"],
+                    properties: {
+                        email: {
+                            bsonType: "string",
+                            pattern: "^.+@.+$",
+                            description: "Must be a valid email address and is required"
+                        },
+                        phone: {
+                            bsonType: "string",
+                            description: "Phone number must be a string and is required"
+                        },
+                        address: {
+                            bsonType: "object",
+                            required: ["street", "city", "state", "zip", "country"],
+                            properties: {
+                                street: {
+                                    bsonType: "string",
+                                    description: "Street address must be a string and is required"
+                                },
+                                city: {
+                                    bsonType: "string",
+                                    description: "City must be a string and is required"
+                                },
+                                state: {
+                                    bsonType: "string",
+                                    description: "State must be a string and is required"
+                                },
+                                zip: {
+                                    bsonType: "string",
+                                    description: "ZIP code must be a string and is required"
+                                },
+                                country: {
+                                    bsonType: "string",
+                                    description: "Country must be a string and is required"
+                                }
+                            }
+                        }
+                    }
+                },
+                services: {
+                    bsonType: "array",
+                    items: {
+                        bsonType: "string"
+                    },
+                    description: "Services must be an array of strings and is required"
+                },
+                createdDate: {
+                    bsonType: "date",
+                    description: "Creation date must be a date and is required"
+                }
+            }
+        }
+    }
+});
+
+db.createCollection("invoices", {
+    validator: {
+        $jsonSchema: {
+            bsonType: "object",
+            required: ["issuerId", "recipientId", "invoiceNumber", "items", "subtotal", "tax", "total", "status", "dueDate", "issueDate", "payments"],
+            properties: {
+                issuerId: {
+                    bsonType: "string",
+                    description: "Issuer ID must be a string and is required"
+                },
+                recipientId: {
+                    bsonType: "string",
+                    description: "Recipient ID must be a string and is required"
+                },
+                invoiceNumber: {
+                    bsonType: "string",
+                    description: "Invoice number must be a string and is required"
+                },
+                items: {
+                    bsonType: "array",
+                    items: {
+                        bsonType: "object",
+                        required: ["description", "quantity", "unitPrice", "totalPrice"],
+                        properties: {
+                            description: {
+                                bsonType: "string",
+                                description: "Item description must be a string and is required"
+                            },
+                            quantity: {
+                                bsonType: "int",
+                                minimum: 1,
+                                description: "Quantity must be an integer greater than 0 and is required"
+                            },
+                            unitPrice: {
+                                bsonType: "double",
+                                description: "Unit price must be a double and is required"
+                            },
+                            discount: {
+                                bsonType: "double",
+                                description: "Discount must be a double and is optional"
+                            },
+                            totalPrice: {
+                                bsonType: "double",
+                                description: "Total price must be a double and is required"
+                            }
+                        }
+                    },
+                    description: "Items must be an array of item objects and is required"
+                },
+                subtotal: {
+                    bsonType: "double",
+                    description: "Subtotal must be a double and is required"
+                },
+                tax: {
+                    bsonType: "array",
+                    items: {
+                        bsonType: "object",
+                        required: ["taxName", "taxRate", "taxAmount", "jurisdictionId"],
+                        properties: {
+                            taxName: {
+                                bsonType: "string",
+                                description: "Tax name must be a string and is required"
+                            },
+                            taxRate: {
+                                bsonType: "double",
+                                description: "Tax rate must be a double and is required"
+                            },
+                            taxAmount: {
+                                bsonType: "double",
+                                description: "Tax amount must be a double and is required"
+                            },
+                            jurisdictionId: {
+                                bsonType: "string",
+                                description: "Jurisdiction ID must be a string and is required"
+                            }
+                        }
+                    },
+                    description: "Tax must be an array of tax objects and is required"
+                },
+                total: {
+                    bsonType: "double",
+                    description: "Total must be a double and is required"
+                },
+                status: {
+                    bsonType: "string",
+                    enum: ["unpaid", "paid", "overdue"],
+                    description: "Status must be a string and is required"
+                },
+                dueDate: {
+                    bsonType: "date",
+                    description: "Due date must be a date and is required"
+                },
+                issueDate: {
+                    bsonType: "date",
+                    description: "Issue date must be a date and is required"
+                },
+                paidDate: {
+                        anyOf: [
+                         { bsonType: "date" },
+                         { bsonType: "null" }
+                     ],    
+                    description: "Paid date must be a date and is optional"
+                },
+                notes: {
+                    bsonType: "string",
+                    description: "Notes must be a string and is optional"
+                },
+                terms: {
+                    bsonType: "string",
+                    description: "Terms must be a string and is optional"
+                },
+                attachments: {
+                    bsonType: "array",
+                    items: {
+                        bsonType: "string"
+                    },
+                    description: "Attachments must be an array of strings and is optional"
+                },
+                payments: {
+                    bsonType: "array",
+                    items: {
+                        bsonType: "object",
+                        required: ["paymentId", "amount", "paymentDate", "paymentMethod", "transactionId", "processorId"],
+                        properties: {
+                            paymentId: {
+                                bsonType: "string",
+                                description: "Payment ID must be a string and is required"
+                            },
+                            amount: {
+                                bsonType: "double",
+                                description: "Amount must be a double and is required"
+                            },
+                            paymentDate: {
+                                bsonType: "date",
+                                description: "Payment date must be a date and is required"
+                            },
+                            paymentMethod: {
+                                bsonType: "string",
+                                description: "Payment method must be a string and is required"
+                            },
+                            transactionId: {
+                                bsonType: "string",
+                                description: "Transaction ID must be a string and is required"
+                            },
+                            processorId: {
+                                bsonType: "string",
+                                description: "Processor ID must be a string and is required"
+                            },
+                            notes: {
+                                bsonType: "string",
+                                description: "Notes must be a string and is optional"
+                            }
+                        }
+                    },
+                    description: "Payments must be an array of payment objects and is required"
+                }
+            }
+        }
+    }
+});
+
+
+db.clients.insertMany([
+    {
+        "_id": "client_id1",
+        "name": "Alice Johnson",
+        "contact": {
+            "email": "alice@example.com",
+            "phone": "555-0101",
+            "address": {
+                "street": "123 Maple Street",
+                "city": "Hometown",
+                "state": "CA",
+                "zip": "90210",
+                "country": "USA"
+            }
+        },
+        "billingInformation": {
+            "billingAddress": "123 Maple Street, Hometown, CA 90210, USA",
+            "paymentTerms": "Net 30",
+            "preferredPaymentMethod": "Credit Card"
+        },
+        "createdDate": new Date("2023-01-01T00:00:00Z")
+    },
+    {
+        "_id": "client_id2",
+        "name": "Bob Smith",
+        "contact": {
+            "email": "bob@example.com",
+            "phone": "555-0202",
+            "address": {
+                "street": "456 Oak Avenue",
+                "city": "Hometown",
+                "state": "CA",
+                "zip": "90210",
+                "country": "USA"
+            }
+        },
+        "billingInformation": {
+            "billingAddress": "456 Oak Avenue, Hometown, CA 90210, USA",
+            "paymentTerms": "Net 30",
+            "preferredPaymentMethod": "Bank Transfer"
+        },
+        "createdDate": new Date("2023-01-02T00:00:00Z")
+    },
+    {
+        "_id": "client_id3",
+        "name": "Charlie Brown",
+        "contact": {
+            "email": "charlie@example.com",
+            "phone": "555-0303",
+            "address": {
+                "street": "789 Pine Road",
+                "city": "Hometown",
+                "state": "CA",
+                "zip": "90210",
+                "country": "USA"
+            }
+        },
+        "billingInformation": {
+            "billingAddress": "789 Pine Road, Hometown, CA 90210, USA",
+            "paymentTerms": "Net 30",
+            "preferredPaymentMethod": "Credit Card"
+        },
+        "createdDate": new Date("2023-01-03T00:00:00Z")
+    },
+    {
+        "_id": "client_id4",
+        "name": "David Clark",
+        "contact": {
+            "email": "david@example.com",
+            "phone": "555-0404",
+            "address": {
+                "street": "101 Maple Street",
+                "city": "Hometown",
+                "state": "CA",
+                "zip": "90210",
+                "country": "USA"
+            }
+        },
+        "billingInformation": {
+            "billingAddress": "101 Maple Street, Hometown, CA 90210, USA",
+            "paymentTerms": "Net 30",
+            "preferredPaymentMethod": "PayPal"
+        },
+        "createdDate": new Date("2023-01-04T00:00:00Z")
+    },
+    {
+        "_id": "client_id5",
+        "name": "Eve Davis",
+        "contact": {
+            "email": "eve@example.com",
+            "phone": "555-0505",
+            "address": {
+                "street": "202 Oak Avenue",
+                "city": "Hometown",
+                "state": "CA",
+                "zip": "90210",
+                "country": "USA"
+            }
+        },
+        "billingInformation": {
+            "billingAddress": "202 Oak Avenue, Hometown, CA 90210, USA",
+            "paymentTerms": "Net 30",
+            "preferredPaymentMethod": "Credit Card"
+        },
+        "createdDate": new Date("2023-01-05T00:00:00Z")
+    }
+]);
+
+db.paymentProcessors.insertMany([
+    {
+        "_id": "processor_id1",
+        "name": "Bank of Payments",
+        "type": "Bank",
+        "contact": {
+            "email": "support@bankofpayments.com",
+            "phone": "800-123-4567",
+            "address": {
+                "street": "456 Payment St",
+                "city": "Finance City",
+                "state": "State",
+                "zip": "67890",
+                "country": "USA"
+            }
+        },
+        "services": ["Bank Transfers", "Wire Transfers"],
+        "createdDate": new Date("2023-01-01T00:00:00Z")
+    },
+    {
+        "_id": "processor_id2",
+        "name": "PayPal",
+        "type": "Payment Gateway",
+        "contact": {
+            "email": "support@paypal.com",
+            "phone": "888-221-1161",
+            "address": {
+                "street": "2211 North First Street",
+                "city": "San Jose",
+                "state": "CA",
+                "zip": "95131",
+                "country": "USA"
+            }
+        },
+        "services": ["Credit Card Processing", "Digital Wallet"],
+        "createdDate": new Date("2023-01-01T00:00:00Z")
+    },
+    {
+        "_id": "processor_id3",
+        "name": "Stripe",
+        "type": "Payment Gateway",
+        "contact": {
+            "email": "support@stripe.com",
+            "phone": "877-574-0269",
+            "address": {
+                "street": "185 Berry Street",
+                "city": "San Francisco",
+                "state": "CA",
+                "zip": "94107",
+                "country": "USA"
+            }
+        },
+        "services": ["Credit Card Processing", "Digital Wallet"],
+        "createdDate": new Date("2023-01-01T00:00:00Z")
+    }
+]);
+
+db.invoices.insertMany([
+    {
+        "_id": "invoice_id1",
+        "issuerId": "client_id1",
+        "recipientId": "client_id2",
+        "invoiceNumber": "INV-0001",
+        "items": [
+            {
+                "description": "Consulting Service",
+                "quantity": 10,
+                "unitPrice": Double(100.0),
+                "discount": Double(0.0),
+                "totalPrice": Double(1000.0)
+            },
+            {
+                "description": "Development Service",
+                "quantity": 5,
+                "unitPrice": Double(200.0),
+                "discount": Double(0.0),
+                "totalPrice": Double(1000.0)
+            }
+        ],
+        "subtotal": Double(2000.0),
+        "tax": [
+            {
+                "taxName": "VAT",
+                "taxRate": Double(10.0),
+                "taxAmount": Double(200.0),
+                "jurisdictionId": "jurisdiction_id1"
+            }
+        ],
+        "total": Double(2200.0),
+        "status": "paid",
+        "dueDate": new Date("2023-02-01T00:00:00Z"),
+        "issueDate": new Date("2023-01-01T00:00:00Z"),
+        "paidDate": new Date("2023-01-20T00:00:00Z"),
+        "notes": "Thank you for your business!",
+        "terms": "Net 30",
+        "attachments": [],
+        "payments": [
+            {
+                "paymentId": "payment_id1",
+                "amount": Double(2200.0),
+                "paymentDate": new Date("2023-01-20T00:00:00Z"),
+                "paymentMethod": "Credit Card",
+                "transactionId": "txn_id1",
+                "processorId": "processor_id2",
+                "notes": "Full payment received."
+            }
+        ]
+    },
+    {
+        "_id": "invoice_id2",
+        "issuerId": "client_id2",
+        "recipientId": "client_id3",
+        "invoiceNumber": "INV-0002",
+        "items": [
+            {
+                "description": "Marketing Service",
+                "quantity": 7,
+                "unitPrice": Double(150.0),
+                "discount": Double(0.0),
+                "totalPrice": Double(1050.0)
+            },
+            {
+                "description": "SEO Service",
+                "quantity": 3,
+                "unitPrice": Double(300.0),
+                "discount": Double(0.0),
+                "totalPrice": Double(900.0)
+            }
+        ],
+        "subtotal": Double(1950.0),
+        "tax": [
+            {
+                "taxName": "GST",
+                "taxRate": Double(5.0),
+                "taxAmount": Double(97.5),
+                "jurisdictionId": "jurisdiction_id2"
+            }
+        ],
+        "total": Double(2047.5),
+        "status": "unpaid",
+        "dueDate": new Date("2023-03-01T00:00:00Z"),
+        "issueDate": new Date("2023-02-01T00:00:00Z"),
+        "paidDate": null,
+        "notes": "Payment due within 30 days.",
+        "terms": "Net 30",
+        "attachments": [],
+        "payments": []
+    },
+    {
+        "_id": "invoice_id3",
+        "issuerId": "client_id3",
+        "recipientId": "client_id4",
+        "invoiceNumber": "INV-0003",
+        "items": [
+            {
+                "description": "Graphic Design Service",
+                "quantity": 8,
+                "unitPrice": Double(120.0),
+                "discount": Double(0.0),
+                "totalPrice": Double(960.0)
+            }
+        ],
+        "subtotal": Double(960.0),
+        "tax": [
+            {
+                "taxName": "Sales Tax",
+                "taxRate": Double(8.0),
+                "taxAmount": Double(76.8),
+                "jurisdictionId": "jurisdiction_id3"
+            }
+        ],
+        "total": Double(1036.8),
+        "status": "paid",
+        "dueDate": new Date("2023-04-01T00:00:00Z"),
+        "issueDate": new Date("2023-03-01T00:00:00Z"),
+        "paidDate": new Date("2023-03-15T00:00:00Z"),
+        "notes": "Thank you for your prompt payment!",
+        "terms": "Net 30",
+        "attachments": [],
+        "payments": [
+            {
+                "paymentId": "payment_id3",
+                "amount": Double(1036.8),
+                "paymentDate": new Date("2023-03-15T00:00:00Z"),
+                "paymentMethod": "Bank Transfer",
+                "transactionId": "txn_id3",
+                "processorId": "processor_id1",
+                "notes": "Full payment received."
+            }
+        ]
+    },
+    {
+        "_id": "invoice_id4",
+        "issuerId": "client_id4",
+        "recipientId": "client_id5",
+        "invoiceNumber": "INV-0004",
+        "items": [
+            {
+                "description": "IT Support Service",
+                "quantity": 10,
+                "unitPrice": Double(80.0),
+                "discount": Double(0.0),
+                "totalPrice": Double(800.0)
+            },
+            {
+                "description": "Network Setup",
+                "quantity": 1,
+                "unitPrice": Double(500.0),
+                "discount": Double(0.0),
+                "totalPrice": Double(500.0)
+            }
+        ],
+        "subtotal": Double(1300.0),
+        "tax": [
+            {
+                "taxName": "VAT",
+                "taxRate": Double(10.0),
+                "taxAmount": Double(130.0),
+                "jurisdictionId": "jurisdiction_id1"
+            }
+        ],
+        "total": Double(1430.0),
+        "status": "unpaid",
+        "dueDate": new Date("2023-05-01T00:00:00Z"),
+        "issueDate": new Date("2023-04-01T00:00:00Z"),
+        "paidDate": null,
+        "notes": "Please pay within 30 days.",
+        "terms": "Net 30",
+        "attachments": [],
+        "payments": []
+    },
+    {
+        "_id": "invoice_id5",
+        "issuerId": "client_id5",
+        "recipientId": "client_id1",
+        "invoiceNumber": "INV-0005",
+        "items": [
+            {
+                "description": "Web Development Service",
+                "quantity": 12,
+                "unitPrice": Double(150.0),
+                "discount": Double(0.0),
+                "totalPrice": Double(1800.0)
+            }
+        ],
+        "subtotal": Double(1800.0),
+        "tax": [
+            {
+                "taxName": "GST",
+                "taxRate": Double(5.0),
+                "taxAmount": Double(90.0),
+                "jurisdictionId": "jurisdiction_id2"
+            }
+        ],
+        "total": Double(1890.0),
+        "status": "paid",
+        "dueDate": new Date("2023-06-01T00:00:00Z"),
+        "issueDate": new Date("2023-05-01T00:00:00Z"),
+        "paidDate": new Date("2023-05-20T00:00:00Z"),
+        "notes": "Thank you for your business!",
+        "terms": "Net 30",
+        "attachments": [],
+        "payments": [
+            {
+                "paymentId": "payment_id4",
+                "amount": Double(1890.0),
+                "paymentDate": new Date("2023-05-20T00:00:00Z"),
+                "paymentMethod": "Credit Card",
+                "transactionId": "txn_id4",
+                "processorId": "processor_id3",
+                "notes": "Full payment received."
+            }
+        ]
+    }
+]);
