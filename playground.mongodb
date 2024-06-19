@@ -509,7 +509,7 @@ db.invoices.insertMany([
         "tax": [
             {
                 "taxName": "VAT",
-                "taxRate": Double(10.0),
+                "taxRate": Double(0.10),
                 "taxAmount": Double(200.0),
                 "jurisdictionId": "jurisdiction_id1"
             }
@@ -559,7 +559,7 @@ db.invoices.insertMany([
         "tax": [
             {
                 "taxName": "GST",
-                "taxRate": Double(5.0),
+                "taxRate": Double(0.05),
                 "taxAmount": Double(97.5),
                 "jurisdictionId": "jurisdiction_id2"
             }
@@ -592,23 +592,23 @@ db.invoices.insertMany([
         "tax": [
             {
                 "taxName": "Sales Tax",
-                "taxRate": Double(8.0),
+                "taxRate": Double(0.08),
                 "taxAmount": Double(76.8),
                 "jurisdictionId": "jurisdiction_id3"
             }
         ],
         "total": Double(1036.8),
-        "status": "paid",
+        "status": "unpaid",
         "dueDate": new Date("2023-04-01T00:00:00Z"),
         "issueDate": new Date("2023-03-01T00:00:00Z"),
-        "paidDate": new Date("2023-03-15T00:00:00Z"),
+        "paidDate": null,
         "notes": "Thank you for your prompt payment!",
         "terms": "Net 30",
         "attachments": [],
         "payments": [
             {
                 "paymentId": "payment_id3",
-                "amount": Double(1036.8),
+                "amount": Double(1000.0),
                 "paymentDate": new Date("2023-03-15T00:00:00Z"),
                 "paymentMethod": "Bank Transfer",
                 "transactionId": "txn_id3",
@@ -642,7 +642,7 @@ db.invoices.insertMany([
         "tax": [
             {
                 "taxName": "VAT",
-                "taxRate": Double(10.0),
+                "taxRate": Double(0.10),
                 "taxAmount": Double(130.0),
                 "jurisdictionId": "jurisdiction_id1"
             }
@@ -675,7 +675,7 @@ db.invoices.insertMany([
         "tax": [
             {
                 "taxName": "GST",
-                "taxRate": Double(5.0),
+                "taxRate": Double(0.05),
                 "taxAmount": Double(90.0),
                 "jurisdictionId": "jurisdiction_id2"
             }

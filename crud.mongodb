@@ -1,0 +1,203 @@
+// MongoDB Playground
+// To disable this template go to Settings | MongoDB | Use Default Template For Playground.
+// Make sure you are connected to enable completions and to be able to run a playground.
+// Use Ctrl+Space inside a snippet or a string literal to trigger completions.
+
+// Select the database to use.
+use('invoices');
+
+db.invoices.findOne({_id: "invoice_id1"})
+
+
+// INVOICE
+
+// add invoice //
+
+
+// update invoice //
+
+// add item to invoice
+db.invoices.updateOne( {_id: "invoice_id3"},
+     [
+        // crate new entry to items array, compute totalPrice
+        {
+            $set: {
+                newItem: {
+                    description: "Consulting Service 2",
+                    quantity: 10,
+                    unitPrice: Double(100.0),
+                    discount: Double(0.0),
+                    totalPrice: { $multiply: [10, Double(100.0)] }
+                }
+            }
+        },
+
+        // add created entry to array
+        {
+            $set: {
+                items: {
+                    $concatArrays: ["$items", ["$newItem"]]
+                }
+            }
+        },
+
+        // update subtotal pre tax sum field
+        {
+            $set: {
+                subtotal: { $add: ["$subtotal", "$newItem.totalPrice"] }
+            }
+        },
+
+        // now for every entry in tax recompute totalAmount field
+        {
+            $set: {
+                tax: {
+                    $map: {
+                        input: "$tax",
+                        as: "taxEntry",
+                        in: {
+                            $mergeObjects: [
+                                "$$taxEntry",
+                                {
+                                    taxAmount: {
+                                        $add: [
+                                            "$$taxEntry.taxAmount",
+                                            { $multiply: ["$newItem.totalPrice", "$$taxEntry.taxRate"] }
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+
+        // finalny compute post tax total field
+        {
+            $set: {
+                total: {
+                    $add: [
+                        "$subtotal",
+                        { $sum: "$tax.taxAmount" }
+                    ]
+                }
+            }
+        },
+
+        // remove temp entry
+        {
+            $unset: "newItem"
+        }
+    ]
+)
+
+// delete item
+
+
+
+
+// add payment
+db.invoices.updateOne( {_id: "invoice_id3"},
+    [
+        {
+        // add payment to array
+            $set: {
+                payments: {
+                    $concatArrays: [
+                        "$payments",
+                        [
+                            {
+                                "paymentId": "AAA",
+                                "amount": Double(2000.0),
+                                "paymentDate": ISODate("2023-01-20T00:00:00Z"),
+                                "paymentMethod": "Credit Card",
+                                "transactionId": "txn_id1",
+                                "processorId": "processor_id2",
+                                "notes": "Full payment received."
+                            }
+                        ]
+                    ]
+                },
+            }
+        },
+
+        // store temorary sum of payments
+        {
+            $set: {
+                totalPaid: {
+                    $sum: "$payments.amount"
+                }
+            }
+        },
+
+        // check if we need to change status to 'paid' and set paidDate
+        {
+            $set: {
+                newStatusAndDate: {
+                    $cond: {
+                        if: { $gte: ["$totalPaid", "$total"] },
+                        then: {
+                            status: "paid",
+                            paidDate: new Date(),
+                        },
+                        else: {
+                            status: "$status",
+                            paidDate: "$paidDate"
+                        }
+                    }
+                }
+            }
+        },
+
+        // apply the new status and paidDate
+        {
+            $set: {
+                status: "$newStatusAndDate.status",
+                paidDate: "$newStatusAndDate.paidDate"
+            }
+        },
+
+        // remove temporary fields
+        {
+            $project: {
+                totalPaid: 0,
+                newStatusAndDate: 0
+            }
+        }
+
+    ]
+)
+
+
+// add attachments
+
+// delete attachment
+
+// edit attachment
+
+// add tax 
+
+
+// delete invoice //
+
+
+
+// CLIENTS
+
+// add client
+
+// remove client
+
+// update clinet
+
+
+// PAYMENT PROCESSOR
+
+// add payment processor
+
+// remove payment processor
+
+// edit payment processor
+
+
