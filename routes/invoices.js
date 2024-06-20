@@ -7,3 +7,5 @@ router.get('/', async (req, res) => {
     const invoices = await db.collection('invoices').find({}).toArray();
     res.render('index', { invoices });
 });
+
+module.exports=router
