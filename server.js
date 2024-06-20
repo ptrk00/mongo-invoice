@@ -47,7 +47,7 @@ initializeDatabase().then((db) => {
     // Configure Passport.js local strategy
     passport.use(new LocalStrategy(
         async (username, password, done) => {
-            const user = await db.collection('users').findOne({ username: username });
+            const user = await db.collection('clients').findOne({ username: username });
             if (!user) {
                 logger.error('Incorrect username');
                 return done(null, false, { message: 'Incorrect username.' });
@@ -68,7 +68,7 @@ initializeDatabase().then((db) => {
     });
 
     passport.deserializeUser(async (serializedUser, done) => {
-        const user = await db.collection('users').findOne(
+        const user = await db.collection('clients').findOne(
             { _id: new ObjectId(serializedUser._id)},{ 
             projection: {
                 _id: 1,

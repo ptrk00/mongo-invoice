@@ -3,8 +3,8 @@ const passport = require('passport');
 const bcrypt = require('bcryptjs');
 const router = express.Router();
 const logger = require('../logger');
-// Register endpoint
 
+// Register endpoint
 router.get('/register', (req, res) => {
     res.render('register');
 });
@@ -14,7 +14,7 @@ router.post('/register', async (req, res) => {
     const { username, password } = req.body;
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    await db.collection('users').insertOne({ username: username, password: hashedPassword });
+    await db.collection('clients').insertOne({ username: username, password: hashedPassword });
     res.redirect('login');
 });
 

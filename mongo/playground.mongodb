@@ -163,11 +163,11 @@ db.createCollection("invoices", {
             required: ["issuerId", "recipientId", "invoiceNumber", "items", "subtotal", "tax", "total", "status", "dueDate", "issueDate", "payments"],
             properties: {
                 issuerId: {
-                    bsonType: "string",
+                    bsonType: ["string", "objectId"],
                     description: "Issuer ID must be a string and is required"
                 },
                 recipientId: {
-                    bsonType: "string",
+                    bsonType: ["string", "objectId"],
                     description: "Recipient ID must be a string and is required"
                 },
                 invoiceNumber: {
@@ -317,10 +317,17 @@ db.createCollection("invoices", {
     }
 });
 
+var aliceId = new ObjectId()
+var bobId = new ObjectId()
+var charlieId = new ObjectId()
+var davidId = new ObjectId()
+var eveId = new ObjectId()
 
 db.clients.insertMany([
     {
-        "_id": "client_id1",
+        "_id": aliceId,
+        "username": "alice",
+        "password": "$2a$10$xDqIWUGW7.sesIuIN4ns9u1sbAO0ItreMk1DyrEDBCf2Iuvzolc1K",
         "name": "Alice Johnson",
         "contact": {
             "email": "alice@example.com",
@@ -341,7 +348,9 @@ db.clients.insertMany([
         "createdDate": new Date("2023-01-01T00:00:00Z")
     },
     {
-        "_id": "client_id2",
+        "_id": bobId,
+        "username": "bob",
+        "password": "$2a$10$xDqIWUGW7.sesIuIN4ns9u1sbAO0ItreMk1DyrEDBCf2Iuvzolc1K",
         "name": "Bob Smith",
         "contact": {
             "email": "bob@example.com",
@@ -362,7 +371,9 @@ db.clients.insertMany([
         "createdDate": new Date("2023-01-02T00:00:00Z")
     },
     {
-        "_id": "client_id3",
+        "_id": charlieId,
+        "username": "charlie",
+        "password": "$2a$10$xDqIWUGW7.sesIuIN4ns9u1sbAO0ItreMk1DyrEDBCf2Iuvzolc1K",
         "name": "Charlie Brown",
         "contact": {
             "email": "charlie@example.com",
@@ -383,7 +394,9 @@ db.clients.insertMany([
         "createdDate": new Date("2023-01-03T00:00:00Z")
     },
     {
-        "_id": "client_id4",
+        "_id": davidId,
+        "username": "david",
+        "password": "$2a$10$xDqIWUGW7.sesIuIN4ns9u1sbAO0ItreMk1DyrEDBCf2Iuvzolc1K",
         "name": "David Clark",
         "contact": {
             "email": "david@example.com",
@@ -404,7 +417,9 @@ db.clients.insertMany([
         "createdDate": new Date("2023-01-04T00:00:00Z")
     },
     {
-        "_id": "client_id5",
+        "_id": eveId,
+        "username": "eve",
+        "password": "$2a$10$xDqIWUGW7.sesIuIN4ns9u1sbAO0ItreMk1DyrEDBCf2Iuvzolc1K",
         "name": "Eve Davis",
         "contact": {
             "email": "eve@example.com",
@@ -486,7 +501,7 @@ db.paymentProcessors.insertMany([
 db.invoices.insertMany([
     {
         "_id": "invoice_id1",
-        "issuerId": "client_id1",
+        "issuerId": aliceId,
         "recipientId": "client_id2",
         "invoiceNumber": "INV-0001",
         "items": [
@@ -537,7 +552,7 @@ db.invoices.insertMany([
     {
         "_id": "invoice_id2",
         "issuerId": "client_id2",
-        "recipientId": "client_id3",
+        "recipientId": aliceId,
         "invoiceNumber": "INV-0002",
         "items": [
             {

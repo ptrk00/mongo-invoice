@@ -171,11 +171,11 @@ async function initializeDatabase() {
                         required: ["issuerId", "recipientId", "invoiceNumber", "items", "subtotal", "tax", "total", "status", "dueDate", "issueDate", "payments"],
                         properties: {
                             issuerId: {
-                                bsonType: "string",
+                                bsonType: ["string", "objectId"],
                                 description: "Issuer ID must be a string and is required"
                             },
                             recipientId: {
-                                bsonType: "string",
+                                bsonType: ["string", "objectId"],
                                 description: "Recipient ID must be a string and is required"
                             },
                             invoiceNumber: {
