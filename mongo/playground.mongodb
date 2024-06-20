@@ -441,10 +441,14 @@ db.clients.insertMany([
     }
 ]);
 
+var mBankId = new ObjectId()
+var payPalId = new ObjectId()
+var stripeId = new ObjectId()
+
 db.paymentProcessors.insertMany([
     {
-        "_id": "processor_id1",
-        "name": "Bank of Payments",
+        "_id": mBankId,
+        "name": "mBank",
         "type": "Bank",
         "contact": {
             "email": "support@bankofpayments.com",
@@ -461,7 +465,7 @@ db.paymentProcessors.insertMany([
         "createdDate": new Date("2023-01-01T00:00:00Z")
     },
     {
-        "_id": "processor_id2",
+        "_id": payPalId,
         "name": "PayPal",
         "type": "Payment Gateway",
         "contact": {
@@ -479,7 +483,7 @@ db.paymentProcessors.insertMany([
         "createdDate": new Date("2023-01-01T00:00:00Z")
     },
     {
-        "_id": "processor_id3",
+        "_id": stripeId,
         "name": "Stripe",
         "type": "Payment Gateway",
         "contact": {
@@ -498,11 +502,17 @@ db.paymentProcessors.insertMany([
     }
 ]);
 
+var invoice1Id = new ObjectId()
+var invoice2Id = new ObjectId()
+var invoice3Id = new ObjectId()
+var invoice4Id = new ObjectId()
+var invoice5Id = new ObjectId()
+
 db.invoices.insertMany([
     {
-        "_id": "invoice_id1",
+        "_id": invoice1Id,
         "issuerId": aliceId,
-        "recipientId": "client_id2",
+        "recipientId": bobId,
         "invoiceNumber": "INV-0001",
         "items": [
             {
@@ -550,8 +560,8 @@ db.invoices.insertMany([
         ]
     },
     {
-        "_id": "invoice_id2",
-        "issuerId": "client_id2",
+        "_id": invoice2Id,
+        "issuerId": charlieId,
         "recipientId": aliceId,
         "invoiceNumber": "INV-0002",
         "items": [
@@ -590,9 +600,9 @@ db.invoices.insertMany([
         "payments": []
     },
     {
-        "_id": "invoice_id3",
-        "issuerId": "client_id3",
-        "recipientId": "client_id4",
+        "_id": invoice3Id,
+        "issuerId": bobId,
+        "recipientId": davidId,
         "invoiceNumber": "INV-0003",
         "items": [
             {
@@ -633,9 +643,9 @@ db.invoices.insertMany([
         ]
     },
     {
-        "_id": "invoice_id4",
-        "issuerId": "client_id4",
-        "recipientId": "client_id5",
+        "_id": invoice4Id,
+        "issuerId": davidId,
+        "recipientId": eveId,
         "invoiceNumber": "INV-0004",
         "items": [
             {
@@ -673,9 +683,9 @@ db.invoices.insertMany([
         "payments": []
     },
     {
-        "_id": "invoice_id5",
-        "issuerId": "client_id5",
-        "recipientId": "client_id1",
+        "_id": invoice5Id,
+        "issuerId": charlieId,
+        "recipientId": bobId,
         "invoiceNumber": "INV-0005",
         "items": [
             {
