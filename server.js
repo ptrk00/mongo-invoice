@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
-const { initializeDatabase } = require('./db');
+const { initializeDatabase, client } = require('./db');
 const invoicesRouter = require('./routes/invoices');
 const usersRouter = require('./routes/users');
 const {ObjectId} = require('mongodb')
@@ -11,6 +11,7 @@ const LocalStrategy = require('passport-local').Strategy;
 const bcrypt = require('bcryptjs');
 const logger = require('./logger');
 const expressLayouts = require('express-ejs-layouts');
+const MongoStore = require('connect-mongo');
 
 const app = express();
 const port = 3000;
@@ -32,8 +33,15 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // Initialize session
 app.use(session({
     secret: 'your_secret_key',
-    resave: true,
-    saveUninitialized: false
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({
+        client: client,
+        dbName: 'invoices',
+        collectionName: 'sessions',
+        stringify: false,
+        autoRemove: 'native'
+    })
 }));
 
 // Initialize Passport.js
