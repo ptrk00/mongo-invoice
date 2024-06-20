@@ -32,7 +32,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // Initialize session
 app.use(session({
     secret: 'your_secret_key',
-    resave: false,
+    resave: true,
     saveUninitialized: false
 }));
 

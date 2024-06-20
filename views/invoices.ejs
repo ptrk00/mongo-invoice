@@ -1,6 +1,8 @@
 <h1>Invoice Management</h1>
 <ul>
     <% invoices.forEach(function(invoice) { %>
-        <li>Invoice Number: <%= invoice.invoiceNumber %> - Total: <%= invoice.total %></li>
-     <% }); %>
+        <li>
+            <a href="/invoices/details/<%= invoice._id %>"><%= invoice.invoiceNumber %></a>
+        </li>
+    <% }); %>
 </ul>

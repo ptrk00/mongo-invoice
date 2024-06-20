@@ -2,8 +2,11 @@ const { MongoClient } = require('mongodb');
 const logger = require('./logger')
 
 const uri = 'mongodb://localhost:27017';
-const client = new MongoClient(uri);
+const client = new MongoClient(uri, {monitorCommands: true});
 
+client.on('commandStarted', (event) => logger.info(`Querying database: ${JSON.stringify(event.command)}`))
+client.on('commandSucceeded', (event) => logger.info(`Result from database: ${JSON.stringify(event.reply)}`))
+client.on('commandFailed', (event) => logger.info(`Querying database: ${JSON.stringify(event)}`))
 async function initializeDatabase() {
     logger.info('Connecting to MongoDB...');
     try {
