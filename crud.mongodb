@@ -23,6 +23,7 @@ db.invoices.updateOne( {_id: "invoice_id3"},
         {
             $set: {
                 newItem: {
+                    _id: new ObjectId(),
                     description: "Consulting Service 2",
                     quantity: 10,
                     unitPrice: Double(100.0),
@@ -93,8 +94,90 @@ db.invoices.updateOne( {_id: "invoice_id3"},
 )
 
 // delete item
+db.invoices.updateOne(
+    { _id: "invoice_id3" },
+    [
+        // Identify the item to remove
+        {
+            $set: {
+                itemToRemove: {
+                    $arrayElemAt: [
+                        {
+                            $filter: {
+                                input: "$items",
+                                as: "item",
+                                cond: { $eq: ["$$item._id", ObjectId("66740c8e69900e6c72a26a14")] }
+                            }
+                        },
+                        0
+                    ]
+                }
+            }
+        },
 
+        // Remove the identified item from the array
+        {
+            $set: {
+                items: {
+                    $filter: {
+                        input: "$items",
+                        as: "item",
+                        cond: { $ne: ["$$item._id", ObjectId("66740c8e69900e6c72a26a14")] }
+                    }
+                }
+            }
+        },
 
+        // Update subtotal pre-tax sum field
+        {
+            $set: {
+                subtotal: { $subtract: ["$subtotal", "$itemToRemove.totalPrice"] }
+            }
+        },
+
+        // Recompute tax amounts for each entry in tax array
+        {
+            $set: {
+                tax: {
+                    $map: {
+                        input: "$tax",
+                        as: "taxEntry",
+                        in: {
+                            $mergeObjects: [
+                                "$$taxEntry",
+                                {
+                                    taxAmount: {
+                                        $subtract: [
+                                            "$$taxEntry.taxAmount",
+                                            { $multiply: ["$itemToRemove.totalPrice", "$$taxEntry.taxRate"] }
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+
+        // Compute the new total post-tax
+        {
+            $set: {
+                total: {
+                    $add: [
+                        "$subtotal",
+                        { $sum: "$tax.taxAmount" }
+                    ]
+                }
+            }
+        },
+
+        // Remove temporary fields
+        {
+            $unset: "itemToRemove"
+        }
+    ]
+)
 
 
 // add payment
