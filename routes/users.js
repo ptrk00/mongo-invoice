@@ -34,7 +34,8 @@ router.get('/profile', (req, res) => {
         console.log("not authenticated")
         return res.redirect('login');
     }
-    // console.log('user id =====', req.user._id)
+    console.log('user is', req.user)
+    console.log('user id =====', req.user._id)
     res.render('profile', { user: req.user });
 });
 

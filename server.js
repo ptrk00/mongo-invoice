@@ -59,12 +59,17 @@ initializeDatabase().then((db) => {
 
     passport.serializeUser((user, done) => {
         console.log('Serialize user:', user);
-        done(null, user._id);
+        done(null, {_id: user._id.toString(), username: user.username});
     });
 
-    passport.deserializeUser(async (id, done) => {
-        console.log(id)
-        const user = await db.collection('users').findOne({ _id: new ObjectId(id) });
+    passport.deserializeUser(async (serializedUser, done) => {
+        console.log('Serialized user', serializedUser)
+        const user = await db.collection('users').findOne(
+            { _id: new ObjectId(serializedUser._id)},{ 
+            projection: {
+                _id: 1,
+                username: 1
+            } });
         console.log('Deserialize user:', user);
         done(null, user);
     });
