@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const ensureAuthenticated = require('../middleware')
-const {ObjectId} = require('mongodb')
+const {ObjectId, Double} = require('mongodb')
 const logger = require('../logger');
 
 // ensure auth
@@ -35,6 +35,111 @@ router.get('/details/:id', async (req, res) => {
     });
     res.render('invoice', { invoice });
 });
+
+router.patch('/:id/items', async (req, res) => {
+    try {
+        const invoiceId = req.params.id;
+        const newItem = req.body;
+
+        logger.info(`request body: ${JSON.stringify(newItem)}`)
+
+        // Validate and parse new item
+        if (!newItem.description || !newItem.quantity || !newItem.unitPrice || typeof newItem.discount !== 'number') {
+            return res.status(400).send('Invalid item data');
+        }
+
+        newItem._id = new ObjectId();
+
+        const result = await req.app.locals.db.collection('invoices').updateOne(
+            { _id: new ObjectId(invoiceId) },
+            [
+                // Create new entry to items array, compute totalPrice
+                {
+                    $set: {
+                        newItem: {
+                            _id: newItem._id,
+                            description: newItem.description,
+                            quantity: newItem.quantity,
+                            unitPrice: new Double(newItem.unitPrice),
+                            discount: new Double(newItem.discount),
+                            totalPrice: { $multiply: [newItem.quantity, new Double(newItem.unitPrice)] }
+                        }
+                    }
+                },
+
+                // Add created entry to array
+                {
+                    $set: {
+                        items: {
+                            $concatArrays: ["$items", ["$newItem"]]
+                        }
+                    }
+                },
+
+                // Update subtotal pre tax sum field
+                {
+                    $set: {
+                        subtotal: { $add: ["$subtotal", "$newItem.totalPrice"] }
+                    }
+                },
+
+                // Recompute totalAmount field for every entry in tax
+                {
+                    $set: {
+                        tax: {
+                            $map: {
+                                input: "$tax",
+                                as: "taxEntry",
+                                in: {
+                                    $mergeObjects: [
+                                        "$$taxEntry",
+                                        {
+                                            taxAmount: {
+                                                $add: [
+                                                    "$$taxEntry.taxAmount",
+                                                    { $multiply: ["$newItem.totalPrice", "$$taxEntry.taxRate"] }
+                                                ]
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+
+                // Compute post tax total field
+                {
+                    $set: {
+                        total: {
+                            $add: [
+                                "$subtotal",
+                                { $sum: "$tax.taxAmount" }
+                            ]
+                        }
+                    }
+                },
+
+                // Remove temp entry
+                {
+                    $unset: "newItem"
+                }
+            ]
+        );
+
+        if (result.modifiedCount === 0) {
+            return res.status(404).send('Invoice not found');
+        }
+
+        res.send('Invoice updated successfully');
+    } catch (error) {
+        console.error('Error updating invoice:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+
+
 
 
 module.exports=router
