@@ -9,7 +9,8 @@ const session = require('express-session');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const bcrypt = require('bcryptjs');
-const logger = require('./logger')
+const logger = require('./logger');
+const expressLayouts = require('express-ejs-layouts');
 
 const app = express();
 const port = 3000;
@@ -19,6 +20,11 @@ app.use((req, res, next) => {
     logger.info(logMessage);
     next();
 });
+
+// Set EJS as templating engine
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+app.use(expressLayouts);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -33,10 +39,6 @@ app.use(session({
 // Initialize Passport.js
 app.use(passport.initialize());
 app.use(passport.session());
-
-// Set EJS as templating engine
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
 
 // Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, 'public')));
@@ -75,6 +77,10 @@ initializeDatabase().then((db) => {
                 username: 1
             } });
         done(null, user);
+    });
+
+    app.get('/', (req, res) => {
+        res.render('home', { title: 'Home' });
     });
 
     // routers

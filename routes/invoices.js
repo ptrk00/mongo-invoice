@@ -9,13 +9,13 @@ router.use(ensureAuthenticated);
 router.get('/issued', async (req, res) => {
     const db = req.app.locals.db;
     const invoices = await db.collection('invoices').find({issuerId: req.user._id}).toArray();
-    res.render('index', { invoices });
+    res.render('invoices', { invoices });
 });
 
 router.get('/received', async (req, res) => {
     const db = req.app.locals.db;
     const invoices = await db.collection('invoices').find({recipientId: req.user._id}).toArray();
-    res.render('index', { invoices });
+    res.render('invoices', { invoices });
 });
 
 module.exports=router

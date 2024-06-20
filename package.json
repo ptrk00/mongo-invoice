@@ -15,6 +15,7 @@
     "bcryptjs": "^2.4.3",
     "ejs": "^3.1.10",
     "express": "^4.19.2",
+    "express-ejs-layouts": "^2.5.1",
     "express-requests-logger": "^4.0.0",
     "express-session": "^1.18.0",
     "mongodb": "^6.7.0",
