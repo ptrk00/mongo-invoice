@@ -1,7 +1,83 @@
 <h1>Invoice Management</h1>
-<ul>
-        <li>
-            <strong>Invoice Details:</strong>
-            <pre><%= JSON.stringify(invoice, null, 2) %></pre>
-        </li>
-</ul>
+<strong>Invoice Details:</strong>
+<pre><%= JSON.stringify(invoice, null, 2) %></pre>
+</br>
+<% if (invoice.items && invoice.items.length > 0) { %>
+    <h2>Items</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Discount</th>
+                <th>Total Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% invoice.items.forEach(function(item) { %>
+                <tr>
+                    <td><%= item.description %></td>
+                    <td><%= item.quantity %></td>
+                    <td><%= item.unitPrice %></td>
+                    <td><%= item.discount %></td>
+                    <td><%= item.totalPrice %></td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+<% } %>
+</br>
+<% if (invoice.tax && invoice.tax.length > 0) { %>
+    <h2>Taxes</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Tax Name</th>
+                <th>Tax Rate</th>
+                <th>Tax Amount</th>
+                <th>Jurisdiction ID</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% invoice.tax.forEach(function(tax) { %>
+                <tr>
+                    <td><%= tax.taxName %></td>
+                    <td><%= tax.taxRate %></td>
+                    <td><%= tax.taxAmount %></td>
+                    <td><%= tax.jurisdictionId %></td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+<% } %>
+</br>
+<% if (invoice.payments && invoice.payments.length > 0) { %>
+    <h2>Payments</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Payment ID</th>
+                <th>Amount</th>
+                <th>Payment Date</th>
+                <th>Payment Method</th>
+                <th>Transaction ID</th>
+                <th>Processor ID</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% invoice.payments.forEach(function(payment) { %>
+                <tr>
+                    <td><%= payment.paymentId %></td>
+                    <td><%= payment.amount %></td>
+                    <td><%= payment.paymentDate.toISOString().slice(0, 10) %></td>
+                    <td><%= payment.paymentMethod %></td>
+                    <td><%= payment.transactionId %></td>
+                    <td><%= payment.processorId %></td>
+                    <td><%= payment.notes %></td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+<% } %>
