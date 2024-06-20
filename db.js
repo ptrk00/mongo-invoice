@@ -1,9 +1,11 @@
 const { MongoClient } = require('mongodb');
+const logger = require('./logger')
 
 const uri = 'mongodb://localhost:27017';
 const client = new MongoClient(uri);
 
 async function initializeDatabase() {
+    logger.info('Connecting to MongoDB...');
     try {
         await client.connect();
         const db = client.db('invoices');
@@ -323,10 +325,10 @@ async function initializeDatabase() {
                 }
         });
 
-        console.log('Connected to MongoDB and schema validators set');
+        logger.info('Connected to MongoDB and schema validators set');
         return db;
     } catch (err) {
-        console.error(err);
+        logger.error(err);
         process.exit(1);
     }
 }

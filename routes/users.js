@@ -2,7 +2,7 @@ const express = require('express');
 const passport = require('passport');
 const bcrypt = require('bcryptjs');
 const router = express.Router();
-
+const logger = require('../logger');
 // Register endpoint
 
 router.get('/register', (req, res) => {
@@ -31,11 +31,9 @@ router.post('/login', passport.authenticate('local', {
 // Profile endpoint
 router.get('/profile', (req, res) => {
     if (!req.isAuthenticated()) {
-        console.log("not authenticated")
+        logger.error("not authenticated")
         return res.redirect('login');
     }
-    console.log('user is', req.user)
-    console.log('user id =====', req.user._id)
     res.render('profile', { user: req.user });
 });
 

@@ -9,9 +9,16 @@ const session = require('express-session');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const bcrypt = require('bcryptjs');
+const logger = require('./logger')
 
 const app = express();
 const port = 3000;
+
+app.use((req, res, next) => {
+    const logMessage = `${req.method} ${req.url} ${res.statusCode}`;
+    logger.info(logMessage);
+    next();
+});
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -37,40 +44,36 @@ app.use(express.static(path.join(__dirname, 'public')));
 initializeDatabase().then((db) => {
     app.locals.db = db;
 
-
     // Configure Passport.js local strategy
     passport.use(new LocalStrategy(
         async (username, password, done) => {
             const user = await db.collection('users').findOne({ username: username });
             if (!user) {
-                console.log('Incorrect username');
+                logger.error('Incorrect username');
                 return done(null, false, { message: 'Incorrect username.' });
             }
             const isMatch = await bcrypt.compare(password, user.password);
             if (!isMatch) {
-                console.log('Incorrect password');
+                logger.error('Incorrect password');
                 return done(null, false, { message: 'Incorrect password.' });
             }
 
-            console.log('User authenticated');
+            logger.info(`User ${user.username} authenticated`, );
             return done(null, user);
         }
     ));
 
     passport.serializeUser((user, done) => {
-        console.log('Serialize user:', user);
         done(null, {_id: user._id.toString(), username: user.username});
     });
 
     passport.deserializeUser(async (serializedUser, done) => {
-        console.log('Serialized user', serializedUser)
         const user = await db.collection('users').findOne(
             { _id: new ObjectId(serializedUser._id)},{ 
             projection: {
                 _id: 1,
                 username: 1
             } });
-        console.log('Deserialize user:', user);
         done(null, user);
     });
 
@@ -79,8 +82,10 @@ initializeDatabase().then((db) => {
     app.use('/user', usersRouter);
 
     app.listen(port, () => {
-        console.log(`Server is running on http://localhost:${port}`);
+        logger.info(`Server is running on http://localhost:${port}`);
     });
 }).catch(err => {
-    console.error('Failed to initialize the database', err);
+    logger.error('Failed to initialize the database', err);
 });
+
+module.exports = logger;
