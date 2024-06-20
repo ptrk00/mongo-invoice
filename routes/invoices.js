@@ -33,7 +33,8 @@ router.get('/details/:id', async (req, res) => {
             }
         ]
     });
-    res.render('invoice', { invoice });
+    let isIssuer = req.user._id.toString() === invoice.issuerId.toString()
+    res.render('invoice', { invoice, isIssuer });
 });
 
 router.patch('/:id/items', async (req, res) => {
@@ -138,8 +139,91 @@ router.patch('/:id/items', async (req, res) => {
     }
 });
 
+router.patch('/:id/payments', async (req, res) => {
+    try {
+        const invoiceId = req.params.id;
+        const newPayment = req.body;
 
+        // Validate and parse new payment
+        if (!newPayment.amount || !newPayment.paymentMethod ||  !newPayment.processorId) {
+            return res.status(400).send('Invalid payment data');
+        }
 
+        newPayment.amount = new Double(newPayment.amount);
+        newPayment.paymentDate = new Date();
+        newPayment.paymentId = new ObjectId().toString();
+        newPayment.transactionId = new ObjectId().toString();
+
+        const result = await req.app.locals.db.collection('invoices').updateOne(
+            { _id: new ObjectId(invoiceId) },
+            [
+                // Add payment to array
+                {
+                    $set: {
+                        payments: {
+                            $concatArrays: [
+                                "$payments",
+                                [newPayment]
+                            ]
+                        }
+                    }
+                },
+
+                // Store temporary sum of payments
+                {
+                    $set: {
+                        totalPaid: {
+                            $sum: "$payments.amount"
+                        }
+                    }
+                },
+
+                // Check if we need to change status to 'paid' and set paidDate
+                {
+                    $set: {
+                        newStatusAndDate: {
+                            $cond: {
+                                if: { $gte: ["$totalPaid", "$total"] },
+                                then: {
+                                    status: "paid",
+                                    paidDate: new Date()
+                                },
+                                else: {
+                                    status: "$status",
+                                    paidDate: "$paidDate"
+                                }
+                            }
+                        }
+                    }
+                },
+                // Apply the new status and paidDate
+                {
+                    $set: {
+                        status: "$newStatusAndDate.status",
+                        paidDate: "$newStatusAndDate.paidDate"
+                    }
+                },
+            
+                // Remove temporary fields
+                {
+                    $project: {
+                        totalPaid: 0,
+                        newStatusAndDate: 0
+                    }
+                }
+            ]
+        );
+
+        if (result.modifiedCount === 0) {
+            return res.status(404).send('Invoice not found');
+        }
+
+        res.send('Payment added successfully');
+    } catch (error) {
+        console.error('Error updating invoice:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
 
 
 module.exports=router

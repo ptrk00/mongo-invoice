@@ -2,19 +2,20 @@
 <strong>Invoice Details:</strong>
 <pre><%= JSON.stringify(invoice, null, 2) %></pre>
 </br>
-<% if (invoice.items && invoice.items.length > 0) { %>
-    <h2>Items</h2>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Description</th>
-                <th>Quantity</th>
-                <th>Unit Price</th>
-                <th>Discount</th>
-                <th>Total Price</th>
-            </tr>
-        </thead>
-        <tbody>
+
+<h2>Items</h2>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Description</th>
+            <th>Quantity</th>
+            <th>Unit Price</th>
+            <th>Discount</th>
+            <th>Total Price</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% if (invoice.items && invoice.items.length > 0) { %>
             <% invoice.items.forEach(function(item) { %>
                 <tr>
                     <td><%= item.description %></td>
@@ -24,9 +25,15 @@
                     <td><%= item.totalPrice %></td>
                 </tr>
             <% }); %>
-        </tbody>
-    </table>
+        <% } else { %>
+            <tr>
+                <td colspan="5" class="text-center">No items yet</td>
+            </tr>
+        <% } %>
+    </tbody>
+</table>
 
+<% if (isIssuer) { %>
     <button class="btn btn-primary" onclick="showAddItemForm('<%= invoice._id %>')">Add Item</button>
     <div id="addItemForm-<%= invoice._id %>" style="display:none;">
         <h4>Add New Item</h4>
@@ -53,18 +60,19 @@
 <% } %>
 
 </br>
-<% if (invoice.tax && invoice.tax.length > 0) { %>
-    <h2>Taxes</h2>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Tax Name</th>
-                <th>Tax Rate</th>
-                <th>Tax Amount</th>
-                <th>Jurisdiction ID</th>
-            </tr>
-        </thead>
-        <tbody>
+
+<h2>Taxes</h2>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Tax Name</th>
+            <th>Tax Rate</th>
+            <th>Tax Amount</th>
+            <th>Jurisdiction ID</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% if (invoice.tax && invoice.tax.length > 0) { %>
             <% invoice.tax.forEach(function(tax) { %>
                 <tr>
                     <td><%= tax.taxName %></td>
@@ -73,25 +81,53 @@
                     <td><%= tax.jurisdictionId %></td>
                 </tr>
             <% }); %>
-        </tbody>
-    </table>
-<% } %>
-</br>
-<% if (invoice.payments && invoice.payments.length > 0) { %>
-    <h2>Payments</h2>
-    <table class="table table-striped">
-        <thead>
+        <% } else { %>
             <tr>
-                <th>Payment ID</th>
-                <th>Amount</th>
-                <th>Payment Date</th>
-                <th>Payment Method</th>
-                <th>Transaction ID</th>
-                <th>Processor ID</th>
-                <th>Notes</th>
+                <td colspan="4" class="text-center">No taxes yet</td>
             </tr>
-        </thead>
-        <tbody>
+        <% } %>
+    </tbody>
+</table>
+
+<% if (isIssuer) { %>
+    <button class="btn btn-primary" onclick="showAddTaxForm('<%= invoice._id %>')">Add Tax</button>
+    <div id="addTaxForm-<%= invoice._id %>" style="display:none;">
+        <h4>Add New Tax</h4>
+        <form onsubmit="submitNewTax(event, '<%= invoice._id %>')">
+            <div class="form-group">
+                <label for="taxName">Tax Name</label>
+                <input type="text" class="form-control" id="taxName-<%= invoice._id %>" placeholder="VAT">
+            </div>
+            <div class="form-group">
+                <label for="taxRate">Tax Rate</label>
+                <input type="number" class="form-control" id="taxRate-<%= invoice._id %>" placeholder="0.1" step="0.01">
+            </div>
+            <div class="form-group">
+                <label for="jurisdictionId">Jurisdiction ID</label>
+                <input type="text" class="form-control" id="jurisdictionId-<%= invoice._id %>" placeholder="jurisdiction_id1">
+            </div>
+            <button type="submit" class="btn btn-success">Submit</button>
+        </form>
+    </div>
+<% } %>
+
+</br>
+
+<h2>Payments</h2>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Payment ID</th>
+            <th>Amount</th>
+            <th>Payment Date</th>
+            <th>Payment Method</th>
+            <th>Transaction ID</th>
+            <th>Processor ID</th>
+            <th>Notes</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% if (invoice.payments && invoice.payments.length > 0) { %>
             <% invoice.payments.forEach(function(payment) { %>
                 <tr>
                     <td><%= payment.paymentId %></td>
@@ -103,8 +139,38 @@
                     <td><%= payment.notes %></td>
                 </tr>
             <% }); %>
-        </tbody>
-    </table>
+        <% } else { %>
+            <tr>
+                <td colspan="7" class="text-center">No payments yet</td>
+            </tr>
+        <% } %>
+    </tbody>
+</table>
+
+<% if (!isIssuer) { %>
+    <button class="btn btn-primary" onclick="showAddPaymentForm('<%= invoice._id %>')">Add Payment</button>
+    <div id="addPaymentForm-<%= invoice._id %>" style="display:none;">
+        <h4>Add New Payment</h4>
+        <form onsubmit="submitNewPayment(event, '<%= invoice._id %>')">
+            <div class="form-group">
+                <label for="amount">Amount</label>
+                <input type="number" class="form-control" id="amount-<%= invoice._id %>" placeholder="2200" step="0.01">
+            </div>
+            <div class="form-group">
+                <label for="paymentMethod">Payment Method</label>
+                <input type="text" class="form-control" id="paymentMethod-<%= invoice._id %>" placeholder="Credit Card">
+            </div>
+            <div class="form-group">
+                <label for="processorId">Processor ID</label>
+                <input type="text" class="form-control" id="processorId-<%= invoice._id %>" placeholder="processor_id2">
+            </div>
+            <div class="form-group">
+                <label for="notes">Notes</label>
+                <input type="text" class="form-control" id="notes-<%= invoice._id %>" placeholder="Full payment received.">
+            </div>
+            <button type="submit" class="btn btn-success">Submit</button>
+        </form>
+    </div>
 <% } %>
 
 <script>
@@ -123,8 +189,8 @@
         const newItem = {
             description: description,
             quantity: parseFloat(quantity),
-            unitPrice: Number(parseFloat(unitPrice)),
-            discount: Number(parseFloat(discount))
+            unitPrice: parseFloat(unitPrice),
+            discount: parseFloat(discount)
         };
 
         try {
@@ -144,6 +210,82 @@
         } catch (error) {
             console.error('Error adding item:', error);
             alert('Error adding item');
+        }
+    }
+
+    function showAddTaxForm(invoiceId) {
+        document.getElementById('addTaxForm-' + invoiceId).style.display = 'block';
+    }
+
+    async function submitNewTax(event, invoiceId) {
+        event.preventDefault();
+
+        const taxName = document.getElementById('taxName-' + invoiceId).value;
+        const taxRate = document.getElementById('taxRate-' + invoiceId).value;
+        const jurisdictionId = document.getElementById('jurisdictionId-' + invoiceId).value;
+
+        const newTax = {
+            taxName: taxName,
+            taxRate: parseFloat(taxRate),
+            jurisdictionId: jurisdictionId
+        };
+
+        try {
+            const response = await fetch(`/invoices/${invoiceId}/taxes`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(newTax)
+            });
+
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Failed to add tax');
+            }
+        } catch (error) {
+            console.error('Error adding tax:', error);
+            alert('Error adding tax');
+        }
+    }
+
+    function showAddPaymentForm(invoiceId) {
+        document.getElementById('addPaymentForm-' + invoiceId).style.display = 'block';
+    }
+
+    async function submitNewPayment(event, invoiceId) {
+        event.preventDefault();
+
+        const amount = document.getElementById('amount-' + invoiceId).value;
+        const paymentMethod = document.getElementById('paymentMethod-' + invoiceId).value;
+        const processorId = document.getElementById('processorId-' + invoiceId).value;
+        const notes = document.getElementById('notes-' + invoiceId).value;
+
+        const newPayment = {
+            amount: parseFloat(amount),
+            paymentMethod: paymentMethod,
+            processorId: processorId,
+            notes: notes
+        };
+
+        try {
+            const response = await fetch(`/invoices/${invoiceId}/payments`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(newPayment)
+            });
+
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Failed to add payment');
+            }
+        } catch (error) {
+            console.error('Error adding payment:', error);
+            alert('Error adding payment');
         }
     }
 </script>
