@@ -57,7 +57,6 @@ db.invoices.aggregate([
 ]);
 
 // average payment time for each client
-// can replace issuerId to recipientId
 db.invoices.aggregate([
     {
         $match: {

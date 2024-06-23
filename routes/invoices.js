@@ -225,8 +225,6 @@ router.patch('/:id/payments', async (req, res) => {
     }
 });
 
-// Endpoint to display invoice summary// Endpoint to display invoice summary
-// Endpoint to display invoice summary
 // Endpoint to display invoice summary
 router.get('/summary', async (req, res) => {
     try {
@@ -348,7 +346,61 @@ router.get('/summary', async (req, res) => {
             }
         ]).toArray();
 
-        res.render('summary', { title: 'Invoice Summary', invoiceSummary, taxSummary, overdueInvoices, monthlyRevenue });
+        // Query to get average payment time for each client
+        const averagePaymentTime = await db.collection('invoices').aggregate([
+            {
+                $match: {
+                    status: "paid"
+                }
+            },
+            {
+                $project: {
+                    issuerId: 1,
+                    paymentTime: {
+                        $dateDiff: {
+                            startDate: "$issueDate",
+                            endDate: "$paidDate",
+                            unit: "day"
+                        }
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: "$issuerId",
+                    averagePaymentTime: { $avg: "$paymentTime" }
+                }
+            },
+            {
+                $lookup: {
+                    from: "clients",
+                    localField: "_id",
+                    foreignField: "_id",
+                    as: "clientDetails"
+                }
+            },
+            { $unwind: "$clientDetails" },
+            {
+                $project: {
+                    _id: 0,
+                    clientId: "$clientDetails._id",
+                    clientName: "$clientDetails.name",
+                    averagePaymentTime: 1
+                }
+            },
+            {
+                $sort: { averagePaymentTime: 1 }
+            }
+        ]).toArray();
+
+        res.render('summary', { 
+            title: 'Invoice Summary', 
+            invoiceSummary, 
+            taxSummary, 
+            overdueInvoices, 
+            monthlyRevenue, 
+            averagePaymentTime 
+        });
     } catch (error) {
         console.error('Error fetching invoice summary:', error);
         res.status(500).send('Internal Server Error');

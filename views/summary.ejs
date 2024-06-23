@@ -2,7 +2,7 @@
 <html lang="en">
 
     <h1>Invoice Summary</h1>
-
+    
     <h2>Total Invoices per Issuer</h2>
     <table class="table table-striped">
         <thead>
@@ -128,4 +128,31 @@
             <% } %>
         </tbody>
     </table>
+    
+    <h2>Average Payment Time for Each Client</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Client ID</th>
+                <th>Client Name</th>
+                <th>Average Payment Time (Days)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (averagePaymentTime && averagePaymentTime.length > 0) { %>
+                <% averagePaymentTime.forEach(function(entry) { %>
+                    <tr>
+                        <td><%= entry.clientId %></td>
+                        <td><%= entry.clientName %></td>
+                        <td><%= entry.averagePaymentTime %></td>
+                    </tr>
+                <% }); %>
+            <% } else { %>
+                <tr>
+                    <td colspan="3" class="text-center">No data available</td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+    
 </html>
