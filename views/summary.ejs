@@ -102,4 +102,30 @@
             <% } %>
         </tbody>
     </table>
+    
+    <h2>Monthly Revenue Breakdown</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Year</th>
+                <th>Month</th>
+                <th>Monthly Revenue</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (monthlyRevenue && monthlyRevenue.length > 0) { %>
+                <% monthlyRevenue.forEach(function(entry) { %>
+                    <tr>
+                        <td><%= entry._id.year %></td>
+                        <td><%= entry._id.month %></td>
+                        <td><%= entry.monthlyRevenue %></td>
+                    </tr>
+                <% }); %>
+            <% } else { %>
+                <tr>
+                    <td colspan="3" class="text-center">No data available</td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
 </html>
