@@ -52,4 +52,54 @@
             <% } %>
         </tbody>
     </table>
+    
+    <h2>Overdue Invoices</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Client ID</th>
+                <th>Client Name</th>
+                <th>Total Overdue Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (overdueInvoices && overdueInvoices.length > 0) { %>
+                <% overdueInvoices.forEach(function(entry) { %>
+                    <tr>
+                        <td><%= entry._id %></td>
+                        <td><%= entry.clientName %></td>
+                        <td><%= entry.totalOverdueAmount %></td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Invoice Number</th>
+                                        <th>Issue Date</th>
+                                        <th>Due Date</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% entry.overdueInvoices.forEach(function(invoice) { %>
+                                        <tr>
+                                            <td><%= invoice.invoiceNumber %></td>
+                                            <td><%= invoice.issueDate.toISOString().slice(0, 10) %></td>
+                                            <td><%= invoice.dueDate.toISOString().slice(0, 10) %></td>
+                                            <td><%= invoice.total %></td>
+                                        </tr>
+                                    <% }); %>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                <% }); %>
+            <% } else { %>
+                <tr>
+                    <td colspan="3" class="text-center">No data available</td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
 </html>
