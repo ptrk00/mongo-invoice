@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<h1>Invoice Summary</h1>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Issuer ID</th>
+            <th>Issuer Name</th>
+            <th>Total Invoices</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% if (summary && summary.length > 0) { %>
+            <% summary.forEach(function(entry) { %>
+                <tr>
+                    <td><%= entry.issuerId %></td>
+                    <td><%= entry.issuerName %></td>
+                    <td><%= entry.totalInvoices %></td>
+                </tr>
+            <% }); %>
+        <% } else { %>
+            <tr>
+                <td colspan="3" class="text-center">No data available</td>
+            </tr>
+        <% } %>
+    </tbody>
+</table>
+</html>

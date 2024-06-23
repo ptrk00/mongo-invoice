@@ -225,5 +225,44 @@ router.patch('/:id/payments', async (req, res) => {
     }
 });
 
+// Endpoint to display invoice summary
+router.get('/summary', async (req, res) => {
+    try {
+        const result = await req.app.locals.db.collection('invoices').aggregate([
+            {
+                $group: {
+                    _id: "$issuerId",
+                    totalInvoices: { $sum: 1 }
+                }
+            },
+            {
+                $lookup: {
+                    from: "clients",
+                    localField: "_id",
+                    foreignField: "_id",
+                    as: "issuerDetails"
+                }
+            },
+            { $unwind: "$issuerDetails" },
+            {
+                $project: {
+                    _id: 0,
+                    issuerId: "$issuerDetails._id",
+                    issuerName: "$issuerDetails.name",
+                    totalInvoices: 1
+                }
+            },
+            {
+                $sort: { totalInvoices: -1 }
+            }
+        ]).toArray();
+
+        res.render('summary', { title: 'Invoice Summary', summary: result });
+    } catch (error) {
+        console.error('Error fetching invoice summary:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
 
 module.exports=router
