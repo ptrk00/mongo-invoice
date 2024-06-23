@@ -1,29 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<h1>Invoice Summary</h1>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Issuer ID</th>
-            <th>Issuer Name</th>
-            <th>Total Invoices</th>
-        </tr>
-    </thead>
-    <tbody>
-        <% if (summary && summary.length > 0) { %>
-            <% summary.forEach(function(entry) { %>
-                <tr>
-                    <td><%= entry.issuerId %></td>
-                    <td><%= entry.issuerName %></td>
-                    <td><%= entry.totalInvoices %></td>
-                </tr>
-            <% }); %>
-        <% } else { %>
+    <h1>Invoice Summary</h1>
+
+    <h2>Total Invoices per Issuer</h2>
+    <table class="table table-striped">
+        <thead>
             <tr>
-                <td colspan="3" class="text-center">No data available</td>
+                <th>Issuer ID</th>
+                <th>Issuer Name</th>
+                <th>Total Invoices</th>
             </tr>
-        <% } %>
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            <% if (invoiceSummary && invoiceSummary.length > 0) { %>
+                <% invoiceSummary.forEach(function(entry) { %>
+                    <tr>
+                        <td><%= entry.issuerId %></td>
+                        <td><%= entry.issuerName %></td>
+                        <td><%= entry.totalInvoices %></td>
+                    </tr>
+                <% }); %>
+            <% } else { %>
+                <tr>
+                    <td colspan="3" class="text-center">No data available</td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+    
+    <h2>Tax Collected by Jurisdiction</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Jurisdiction</th>
+                <th>Total Tax Collected</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (taxSummary && taxSummary.length > 0) { %>
+                <% taxSummary.forEach(function(entry) { %>
+                    <tr>
+                        <td><%= entry.jurisdiction %></td>
+                        <td><%= entry.totalTaxCollected %></td>
+                    </tr>
+                <% }); %>
+            <% } else { %>
+                <tr>
+                    <td colspan="2" class="text-center">No data available</td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
 </html>

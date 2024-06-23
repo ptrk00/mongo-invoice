@@ -225,10 +225,13 @@ router.patch('/:id/payments', async (req, res) => {
     }
 });
 
-// Endpoint to display invoice summary
+// Endpoint to display invoice summary// Endpoint to display invoice summary
 router.get('/summary', async (req, res) => {
     try {
-        const result = await req.app.locals.db.collection('invoices').aggregate([
+        const db = req.app.locals.db;
+
+        // Query to get total invoices per issuer
+        const invoiceSummary = await db.collection('invoices').aggregate([
             {
                 $group: {
                     _id: "$issuerId",
@@ -257,12 +260,34 @@ router.get('/summary', async (req, res) => {
             }
         ]).toArray();
 
-        res.render('summary', { title: 'Invoice Summary', summary: result });
+        // Query to get total tax collected by jurisdiction
+        const taxSummary = await db.collection('invoices').aggregate([
+            { $unwind: "$tax" },
+            {
+                $group: {
+                    _id: "$tax.jurisdictionId",
+                    totalTaxCollected: { $sum: "$tax.taxAmount" }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    jurisdiction: "$_id",
+                    totalTaxCollected: 1
+                }
+            },
+            {
+                $sort: { totalTaxCollected: -1 }
+            }
+        ]).toArray();
+
+        res.render('summary', { title: 'Invoice Summary', invoiceSummary, taxSummary });
     } catch (error) {
         console.error('Error fetching invoice summary:', error);
         res.status(500).send('Internal Server Error');
     }
 });
+
 
 
 module.exports=router

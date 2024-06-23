@@ -174,11 +174,7 @@ db.invoices.aggregate([
     { $unwind: "$tax" },
     {
         $group: {
-            _id: {
-                country: "$tax.jurisdiction.country",
-                state: "$tax.jurisdiction.state",
-                city: "$tax.jurisdiction.city"
-            },
+            _id: "$tax.jurisdictionId",
             totalTaxCollected: { $sum: "$tax.taxAmount" }
         }
     },
