@@ -155,4 +155,30 @@
         </tbody>
     </table>
     
+    <h2>Total Payments by Processor</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Processor Name</th>
+                <th>Total Payments</th>
+                <th>Payment Count</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (totalPaymentsByProcessor && totalPaymentsByProcessor.length > 0) { %>
+                <% totalPaymentsByProcessor.forEach(function(entry) { %>
+                    <tr>
+                        <td><%= entry._id %></td>
+                        <td><%= entry.totalPayments %></td>
+                        <td><%= entry.paymentCount %></td>
+                    </tr>
+                <% }); %>
+            <% } else { %>
+                <tr>
+                    <td colspan="3" class="text-center">No data available</td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+    
 </html>

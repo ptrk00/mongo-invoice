@@ -24,17 +24,25 @@ router.get('/details/:id', async (req, res) => {
     const db = req.app.locals.db;
     const invoice = await db.collection('invoices').findOne({
         $and: [
-            {_id: new ObjectId(req.params.id)}, 
+            { _id: new ObjectId(req.params.id) },
             {
                 $or: [
-                    {recipientId: new ObjectId(req.user._id)}, 
-                    {issuerId: new ObjectId(req.user._id)}
+                    { recipientId: new ObjectId(req.user._id) },
+                    { issuerId: new ObjectId(req.user._id) }
                 ]
             }
         ]
     });
-    let isIssuer = req.user._id.toString() === invoice.issuerId.toString()
-    res.render('invoice', { invoice, isIssuer });
+
+    if (!invoice) {
+        return res.status(404).send('Invoice not found');
+    }
+
+    const isIssuer = req.user._id.toString() === invoice.issuerId.toString();
+
+    const paymentProcessors = await db.collection('paymentProcessors').find().toArray();
+
+    res.render('invoice', { invoice, isIssuer, paymentProcessors });
 });
 
 router.patch('/:id/items', async (req, res) => {
@@ -153,6 +161,7 @@ router.patch('/:id/payments', async (req, res) => {
         newPayment.paymentDate = new Date();
         newPayment.paymentId = new ObjectId().toString();
         newPayment.transactionId = new ObjectId().toString();
+        newPayment.processorId = new ObjectId(newPayment.processorId)
 
         const result = await req.app.locals.db.collection('invoices').updateOne(
             { _id: new ObjectId(invoiceId) },
@@ -393,22 +402,43 @@ router.get('/summary', async (req, res) => {
             }
         ]).toArray();
 
+        // Query to get total payments received by each payment processor
+        const totalPaymentsByProcessor = await db.collection('invoices').aggregate([
+            { $unwind: "$payments" },
+            {
+                $lookup: {
+                    from: "paymentProcessors",
+                    localField: "payments.processorId",
+                    foreignField: "_id",
+                    as: "processorDetails"
+                }
+            },
+            { $unwind: "$processorDetails" },
+            {
+                $group: {
+                    _id: "$processorDetails.name",
+                    totalPayments: { $sum: "$payments.amount" },
+                    paymentCount: { $sum: 1 }
+                }
+            },
+            {
+                $sort: { totalPayments: -1 }
+            }
+        ]).toArray();
+
         res.render('summary', { 
             title: 'Invoice Summary', 
             invoiceSummary, 
             taxSummary, 
             overdueInvoices, 
             monthlyRevenue, 
-            averagePaymentTime 
+            averagePaymentTime, 
+            totalPaymentsByProcessor
         });
     } catch (error) {
         console.error('Error fetching invoice summary:', error);
         res.status(500).send('Internal Server Error');
     }
 });
-
-module.exports = router;
-
-
 
 module.exports=router

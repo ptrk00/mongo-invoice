@@ -301,7 +301,7 @@ db.createCollection("invoices", {
                                 description: "Transaction ID must be a string and is required"
                             },
                             processorId: {
-                                bsonType: "string",
+                                bsonType: ["string", "objectId"],
                                 description: "Processor ID must be a string and is required"
                             },
                             notes: {
@@ -540,21 +540,21 @@ db.invoices.insertMany([
             }
         ],
         "total": Double(2200.0),
-        "status": "paid",
+        "status": "unpaid",
         "dueDate": new Date("2023-02-01T00:00:00Z"),
         "issueDate": new Date("2023-01-01T00:00:00Z"),
-        "paidDate": new Date("2023-01-20T00:00:00Z"),
+        "paidDate": null,
         "notes": "Thank you for your business!",
         "terms": "Net 30",
         "attachments": [],
         "payments": [
             {
                 "paymentId": "payment_id1",
-                "amount": Double(2200.0),
+                "amount": Double(200.0),
                 "paymentDate": new Date("2023-01-20T00:00:00Z"),
                 "paymentMethod": "Credit Card",
                 "transactionId": "txn_id1",
-                "processorId": "processor_id2",
+                "processorId": mBankId,
                 "notes": "Full payment received."
             }
         ]
@@ -637,7 +637,7 @@ db.invoices.insertMany([
                 "paymentDate": new Date("2023-03-15T00:00:00Z"),
                 "paymentMethod": "Bank Transfer",
                 "transactionId": "txn_id3",
-                "processorId": "processor_id1",
+                "processorId": payPalId,
                 "notes": "Full payment received."
             }
         ]
@@ -720,7 +720,7 @@ db.invoices.insertMany([
                 "paymentDate": new Date("2023-05-20T00:00:00Z"),
                 "paymentMethod": "Credit Card",
                 "transactionId": "txn_id4",
-                "processorId": "processor_id3",
+                "processorId": stripeId,
                 "notes": "Full payment received."
             }
         ]

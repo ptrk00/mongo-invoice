@@ -312,7 +312,7 @@ async function initializeDatabase() {
                                             description: "Transaction ID must be a string and is required"
                                         },
                                         processorId: {
-                                            bsonType: "string",
+                                            bsonType: ["string", "objectId"],
                                             description: "Processor ID must be a string and is required"
                                         },
                                         notes: {
